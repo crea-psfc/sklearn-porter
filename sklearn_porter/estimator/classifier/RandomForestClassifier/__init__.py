@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import numpy as np
 
 from json import encoder
 from json import dumps
@@ -25,12 +26,14 @@ class RandomForestClassifier(Classifier):
     # @formatter:off
     TEMPLATES = {
         'c': {
-            'if':       'if (features[{0}] {1} {2}) {{',
-            'else':     '} else {',
-            'endif':    '}',
-            'arr':      'classes[{0}] = {1}',
-            'indent':   '    ',
-            'join':     '; ',
+            'if':           'if (features[{0}] {1} {2}) {{',
+            'else':         '} else {',
+            'endif':        '}',
+            'arr':          'classes[{0}] = {1}',
+            'indent':       '    ',
+            'join':         '; ',
+	    'contrib_pos':  'contributions[{0}] += {1};',
+            'contrib_neg':  'contributions[{0}] -= {1};',
         },
         'go': {
             'if':       'if features[{0}] {1} {2} {{',
@@ -240,12 +243,41 @@ class RandomForestClassifier(Classifier):
             temp = self.temp('if', n_indents=depth)
             out += temp.format(features[node], '<=', self.repr(threshold[node]))
             if left_nodes[node] != -1.:
+		out += '\n'
+		# calculate contributions here
+		# features[node]: splitting feature index
+		# value[node]: # samples at current (parent) node
+		# left_nodes[node]: # samples after splitting, at child node
+		## contributions are normalized by the sum of samples population
+
+		# fix the sign by picking the abs value and then by the sign(contrib)
+		contributions = value[left_nodes[node]][0][1]/float(np.sum(value[left_nodes[node]]))-value[node][0][1]/float(np.sum(value[node]))
+		abs_contr = self.repr(np.abs(contributions))
+		sign_contr = np.sign(contributions)
+		if sign_contr > 0.:
+		    temp2 = self.temp('contrib_pos', n_indents = depth + 1)
+		else:
+	 	    temp2 = self.temp('contrib_neg', n_indents = depth + 1)
+		out += temp2.format(features[node], abs_contr)
+		out += '\n'
+#		out += 'feat ' + str(features[node])+' contrib: '+ str(value[left_nodes[node]]/float(np.sum(value[left_nodes[node]]))-value[node]/float(np.sum(value[node])))
+#                out += str(left_nodes[node]) #node id, left of the current node
                 out += self.create_branches(
                     left_nodes, right_nodes, threshold, value,
                     features, left_nodes[node], depth + 1)
             out += '\n'
             out += self.temp('else', n_indents=depth)
             if right_nodes[node] != -1.:
+		out += '\n'
+                contributions = value[right_nodes[node]][0][1]/float(np.sum(value[right_nodes[node]]))-value[node][0][1]/float(np.sum(value[node]))
+                abs_contr = self.repr(np.abs(contributions))
+                sign_contr = np.sign(contributions)
+                if sign_contr > 0.:
+                    temp2 = self.temp('contrib_pos', n_indents = depth + 1)
+                else:
+                    temp2 = self.temp('contrib_neg', n_indents = depth + 1)
+                out += temp2.format(features[node], abs_contr)
+                out += '\n'
                 out += self.create_branches(
                     left_nodes, right_nodes, threshold, value,
                     features, right_nodes[node], depth + 1)
@@ -287,6 +319,8 @@ class RandomForestClassifier(Classifier):
         return temp_single_method.format(method_name=self.method_name,
                                          method_id=str(estimator_index),
                                          n_classes=self.n_classes,
+					 n_features=self.n_features,
+					 n_estimators=self.n_estimators,
                                          tree_branches=tree_branches)
 
     def create_method_embedded(self):
@@ -305,6 +339,8 @@ class RandomForestClassifier(Classifier):
         for idx, estimator in enumerate(self.estimators):
             fn_name = self.method_name + '_' + str(idx)
             fn_name = temp_method_calls.format(class_name=self.class_name,
+					       n_estimators=self.n_estimators,
+					       n_features=self.n_features,
                                                method_name=fn_name)
             fn_names.append(fn_name)
         fn_names = '\n'.join(fn_names)
@@ -325,6 +361,7 @@ class RandomForestClassifier(Classifier):
                                  method_name=self.method_name,
                                  method_calls=fn_names, methods=fns,
                                  n_estimators=self.n_estimators,
+				 n_features=self.n_features,
                                  n_classes=self.n_classes)
         return self.indent(out, n_indents=n_indents, skipping=True)
 
@@ -340,7 +377,8 @@ class RandomForestClassifier(Classifier):
         temp_class = self.temp('embedded.class')
         return temp_class.format(class_name=self.class_name,
                                  method_name=self.method_name,
-                                 method=method, n_features=self.n_features)
+                                 method=method, n_features=self.n_features,
+				 n_estimators=self.n_estimators)
 
     def create_class(self):
         temp_class = self.temp('class')

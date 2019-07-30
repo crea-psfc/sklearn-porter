@@ -1,8 +1,10 @@
 {methods}
-int {method_name} (float features[]) {{
+int {method_name} (float features[], float total_contributions[]) {{
     int n_classes = {n_classes};
+    float contributions[{n_features}];
     int classes[n_classes];
     int i;
+    for (i=0; i < {n_features}; i++) total_contributions[i] = 0;
     for (i = 0; i < n_classes; i++) {{
         classes[i] = 0;
     }}

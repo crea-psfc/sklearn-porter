@@ -6,10 +6,15 @@
 
 int main(int argc, const char * argv[]) {{
     float features[argc-1];
+    float contributions[argc-1];
+    float total_contributions[argc-1];
     int i;
     for (i = 1; i < argc; i++) {{
         features[i-1] = atof(argv[i]);
     }}
-    printf("%d", {method_name}(features));
+    printf("%d\n", {method_name}(features, total_contributions));
+    for (i=0; i < {n_features}; i++) {{
+        printf("feature[%d]=%e\n",i,total_contributions[i]);
+    }}
     return 0;
 }}
