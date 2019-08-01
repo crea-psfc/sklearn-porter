@@ -1,8 +1,9 @@
 int {method_name}_{method_id}(float features[], float contributions[]) {{
     int classes[{n_classes}];
+    int i;
+    for (i=0; i < {n_classes}; i++) classes[i] = 0;
     int class_idx = 0;
     int class_val = classes[0];
-    int i;
     for (i=0; i < {n_features}; i++) contributions[i] = 0;
     
     {tree_branches}

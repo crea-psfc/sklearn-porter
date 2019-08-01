@@ -1,5 +1,5 @@
 {methods}
-int {method_name} (float features[], float total_contributions[]) {{
+float {method_name} (float features[], float total_contributions[]) {{
     int n_classes = {n_classes};
     float contributions[{n_features}];
     int classes[n_classes];
@@ -19,5 +19,7 @@ int {method_name} (float features[], float total_contributions[]) {{
             class_val = classes[i];
         }}
     }}
-    return class_idx;
+/*    return class_idx;*/
+    float a = {n_estimators};
+    return ((float)classes[1])/((float)a);
 }}
