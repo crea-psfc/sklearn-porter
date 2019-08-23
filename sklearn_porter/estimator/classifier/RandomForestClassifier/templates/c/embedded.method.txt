@@ -1,25 +1,12 @@
 {methods}
 float {method_name} (float features[], float total_contributions[]) {{
-    int n_classes = {n_classes};
     float contributions[{n_features}];
-    int classes[n_classes];
+    float class_prob = 0.0;
     int i;
     for (i=0; i < {n_features}; i++) total_contributions[i] = 0;
-    for (i = 0; i < n_classes; i++) {{
-        classes[i] = 0;
-    }}
 
     {method_calls}
 
-    int class_idx = 0;
-    int class_val = classes[0];
-    for (i = 1; i < n_classes; i++) {{
-        if (classes[i] > class_val) {{
-            class_idx = i;
-            class_val = classes[i];
-        }}
-    }}
-/*    return class_idx;*/
     float a = {n_estimators};
-    return ((float)classes[1])/((float)a);
+    return ((float)class_prob)/((float)a);
 }}

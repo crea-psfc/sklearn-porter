@@ -1,2 +1,2 @@
-classes[{method_name}(features, contributions)]++;
+class_prob += {method_name}(features, contributions);
 for (int i=0; i < {n_features}; i++) total_contributions[i] += contributions[i]/((float){n_estimators});

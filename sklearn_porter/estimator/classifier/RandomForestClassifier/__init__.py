@@ -287,7 +287,8 @@ class RandomForestClassifier(Classifier):
             clazzes = []
             temp_arr = self.temp('arr', n_indents=depth)
             for i, rate in enumerate(value[node][0]):
-                clazz = temp_arr.format(i, int(rate))
+#                clazz = temp_arr.format(i, int(rate))
+		clazz = temp_arr.format(i, int(rate)/float(sum(value[node][0])))
                 clazz = '\n' + clazz
                 clazzes.append(clazz)
             out += self.temp('join').join(clazzes) + self.temp('join')
