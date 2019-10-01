@@ -7,6 +7,6 @@ float {method_name} (float features[], float total_contributions[]) {{
 
     {method_calls}
 
-    float a = {n_estimators};
+    float a = {n_estimators}.0f;
     return ((float)class_prob)/((float)a);
 }}
