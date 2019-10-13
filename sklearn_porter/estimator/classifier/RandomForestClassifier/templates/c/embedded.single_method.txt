@@ -1,4 +1,4 @@
-float {method_name}_{method_id}(float features[], float contributions[]) {{
+static float {method_name}_{method_id}(float features[], float contributions[]) {{
     float classes[{n_classes}];
     int i;
     for (i=0; i < {n_classes}; i++) classes[i] = 0;
